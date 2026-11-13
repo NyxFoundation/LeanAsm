@@ -17,7 +17,7 @@ inductive Opcode where
   | LB | LH | LW | LD | LBU | LHU | LWU | SB | SH | SW | SD
   | BEQ | BNE | BLT | BGE | BLTU | BGEU | JAL | JALR
   | MUL | MULH | MULHSU | MULHU | DIV | DIVU | REM | REMU | FENCE
-  deriving DecidableEq, BEq, Repr
+  deriving DecidableEq, BEq, ReflBEq, LawfulBEq, Repr
 
 namespace Opcode
 
@@ -59,16 +59,20 @@ namespace IsaProfile
 
 def rv64im : IsaProfile := ⟨Opcode.all⟩
 
+def Supports (profile : IsaProfile) (instruction : Instr) : Prop :=
+  instruction.opcode ∈ profile.allowed
+
 def supports (profile : IsaProfile) (instruction : Instr) : Bool :=
   profile.allowed.contains instruction.opcode
 
-def Supports (profile : IsaProfile) (instruction : Instr) : Prop :=
-  profile.supports instruction = true
+@[simp] theorem supports_eq_true (profile : IsaProfile) (instruction : Instr) :
+    profile.supports instruction = true ↔ profile.Supports instruction :=
+  List.contains_iff_mem
 
 instance (profile : IsaProfile) (instruction : Instr) :
-    Decidable (profile.Supports instruction) := by
-  unfold Supports
-  exact Bool.decEq _ true
+    Decidable (profile.Supports instruction) :=
+  decidable_of_iff (profile.supports instruction = true)
+    (profile.supports_eq_true instruction)
 
 end IsaProfile
 
