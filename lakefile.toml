@@ -1,0 +1,6 @@
+name = "LeanAsm"
+version = "0.1.0"
+defaultTargets = ["LeanAsm"]
+
+[[lean_lib]]
+name = "LeanAsm"
