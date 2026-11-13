@@ -9,27 +9,27 @@ memory is immutable and separate from data memory.
 
 namespace LeanAsm.Rv64
 
-private def writeReg (s : State) (rd : Reg) (value : Word) : Except Trap State :=
+def writeReg (s : State) (rd : Reg) (value : Word) : Except Trap State :=
   .ok (s.setReg rd value).advance
 
-private def loadReg (s : State) (width : Nat) (rd rs1 : Reg)
+def loadReg (s : State) (width : Nat) (rd rs1 : Reg)
     (offset : BitVec 12) (extend : Word → Word := id) : Except Trap State := do
   let value ← s.memory.load width (s.getReg rs1 + offset.signExtend 64)
   writeReg s rd (extend value)
 
-private def storeReg (s : State) (width : Nat) (rs1 rs2 : Reg)
+def storeReg (s : State) (width : Nat) (rs1 rs2 : Reg)
     (offset : BitVec 12) : Except Trap State := do
   let memory ← s.memory.store width
     (s.getReg rs1 + offset.signExtend 64) (s.getReg rs2)
   return { s.advance with memory := memory }
 
-private def jump (s : State) (rd : Reg) (target : Word) : Except Trap State :=
+def jump (s : State) (rd : Reg) (target : Word) : Except Trap State :=
   if target.toNat % 4 == 0 then
     .ok { s.setReg rd (s.pc + 4) with pc := target }
   else
     .error .instructionMisaligned
 
-private def branch (s : State) (taken : Bool) (offset : BitVec 13) :
+def branch (s : State) (taken : Bool) (offset : BitVec 13) :
     Except Trap State :=
   if taken then jump s .x0 (s.pc + offset.signExtend 64)
   else .ok s.advance
