@@ -39,10 +39,10 @@ def Memory.valid (m : Memory) : Bool :=
   m.regions.all Region.valid &&
     decide (m.regions.toList.Pairwise Region.disjoint)
 
-private def supportedWidth (width : Nat) : Bool :=
+def supportedWidth (width : Nat) : Bool :=
   width == 1 || width == 2 || width == 4 || width == 8
 
-private def Memory.locate (m : Memory) (width : Nat) (addr : Word) :
+def Memory.locate (m : Memory) (width : Nat) (addr : Word) :
     Except Trap (Nat × Nat) := do
   unless m.valid do throw .invalidMemory
   unless supportedWidth width do throw .unsupportedWidth
@@ -55,7 +55,7 @@ private def Memory.locate (m : Memory) (width : Nat) (addr : Word) :
       else
         throw .memoryBounds
 
-private def readBytes (bytes : Array UInt8) (offset width : Nat) :
+def readBytes (bytes : Array UInt8) (offset width : Nat) :
     Except Trap Word :=
   (List.range width).foldlM (fun value i =>
     if h : offset + i < bytes.size then
@@ -71,7 +71,7 @@ def Memory.load (m : Memory) (width : Nat) (addr : Word) :
   else
     throw .memoryBounds
 
-private def writeBytes (bytes : Array UInt8) (offset width : Nat) (value : Word) :
+def writeBytes (bytes : Array UInt8) (offset width : Nat) (value : Word) :
     Except Trap (Array UInt8) :=
   (List.range width).foldlM (fun output i =>
     if h : offset + i < output.size then
