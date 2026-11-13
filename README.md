@@ -7,7 +7,7 @@ It is intended to be shared by:
 
 - `ssz-asm`
 - `cl-asm`
-- `libp2p-asm`
+- `p2p-asm`
 
 The architecture follows the verified macro-assembly approach demonstrated by
 [Verified-zkEVM/evm-asm](https://github.com/Verified-zkEVM/evm-asm), while
@@ -59,7 +59,8 @@ open LeanAsm.Rv64
 
 ## Migration order
 
-1. Move the independent RV64 modules from `libp2p-asm` to LeanAsm.
+1. Share the portable RV64 vocabulary and encoders with `p2p-asm` while
+   preserving its deliberately finite proof profile.
 2. Move `ssz-asm`'s symbolic assembly and ABI helpers to LeanAsm.
 3. Port `cl-asm` programs and proofs from their current machine model.
 4. Extract reusable Hoare, frame, separation, and SAsm soundness infrastructure.

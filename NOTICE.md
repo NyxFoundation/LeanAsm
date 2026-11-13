@@ -9,7 +9,7 @@ LeanAsm's architecture and structured-assembly lowering are adapted from:
 The initial region-memory, executable-state, encoder, and compact structured
 assembly implementation were adapted from:
 
-- adust09/libp2p-asm,
+- NyxFoundation/p2p-asm (formerly adust09/libp2p-asm),
   commit `f44d410b73aae7ed67d98b1b929fb25d96aa3a3a`.
 
 That implementation records its RV64 register/instruction representation as
