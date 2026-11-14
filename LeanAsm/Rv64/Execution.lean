@@ -121,10 +121,10 @@ def step (p : Image) (s : State) : Except Trap State := do
 
 /-- Execute a supplied sequence without fetching. Branch and jump instructions
     still update the program counter according to their machine semantics. -/
-def execProgram (program : Program) (s : State) : Except Trap State :=
-  program.foldlM (fun state instruction => execInstr instruction state) s
+def execSequence (code : Program) (s : State) : Except Trap State :=
+  code.foldlM (fun state instruction => execInstr instruction state) s
 
-abbrev execSequence := execProgram
+abbrev execProgram := execSequence
 
 structure Completed where
   state : State
