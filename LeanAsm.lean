@@ -11,3 +11,4 @@ import LeanAsm.SAsm.Flatten
 import LeanAsm.Symbolic
 import LeanAsm.Frontend
 import LeanAsm.ABI.LP64
+import LeanAsm.X64
