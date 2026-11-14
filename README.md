@@ -2,7 +2,7 @@
 
 LeanAsm is a reusable Lean 4 foundation for typed RV64IM and scalar x86-64
 assembly, executable machine semantics, encoding, and source emission.
-The structured SAsm lowering layer currently targets RV64IM.
+The structured assembly layer, `LeanAsm.Rv64.SAsm`, is RISC-V-specific.
 
 It is intended to be shared by:
 
@@ -26,8 +26,8 @@ remaining independent of EVM, zkVM execution, and `riscv-zkvm`.
 | `LeanAsm.Rv64.Execution` | Trap-aware execution and instruction fetch |
 | `LeanAsm.Rv64.Encoding` | Little-endian 32-bit machine-code encoding |
 | `LeanAsm.Rv64.Emit` | GNU-as output for real instructions |
-| `LeanAsm.SAsm.Ast` | Minimal structured control-flow syntax |
-| `LeanAsm.SAsm.Flatten` | Position-aware lowering and offset checks |
+| `LeanAsm.Rv64.SAsm.Ast` | RV64 structured control-flow syntax |
+| `LeanAsm.Rv64.SAsm.Flatten` | Position-aware lowering and offset checks |
 | `LeanAsm.Symbolic` | Labels, data, relocations, and GNU pseudo instructions |
 | `LeanAsm.Frontend` | `EmitAsm`, `LowerRv64`, and `LowerX64` capability APIs |
 | `LeanAsm.ABI.LP64` | RISC-V integer ABI register and stack-frame helpers |
@@ -50,7 +50,7 @@ remaining independent of EVM, zkVM execution, and `riscv-zkvm`.
   regions with explicit write permission.
 - No zkVM input/output, commit operation, custom ECALL, or accelerator is part
   of the portable core.
-- The current SAsm layer proves lowering size and checks offset ranges. Full
+- The RV64 SAsm layer proves lowering size and checks offset ranges. Full
   Hoare/separation-logic extraction is a later milestone.
 
 ## Dependency
@@ -64,10 +64,15 @@ rev = "<commit>"
 
 ```lean
 import LeanAsm.Rv64.Execution
-import LeanAsm.SAsm.Flatten
+import LeanAsm.Rv64.SAsm.Flatten
 
 open LeanAsm.Rv64
 ```
+
+When updating existing SAsm consumers, replace `LeanAsm.SAsm.*` imports and
+`LeanAsm.SAsm` namespace references with `LeanAsm.Rv64.SAsm.*` and
+`LeanAsm.Rv64.SAsm`. This includes the `Source` wrapper in `LeanAsm.Frontend`.
+The old module paths and namespace are not retained.
 
 ## x86-64
 

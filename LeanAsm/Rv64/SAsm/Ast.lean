@@ -1,14 +1,14 @@
 import LeanAsm.Rv64.Program
 
 /-!
-# Minimal structured assembly syntax
+# RV64 structured assembly syntax
 
 This is the reusable control-flow core inspired by evm-asm's SAsm. Verification
 annotations and project-specific control-flow forms are intentionally separate
 from this syntax.
 -/
 
-namespace LeanAsm.SAsm
+namespace LeanAsm.Rv64.SAsm
 
 open LeanAsm.Rv64
 
@@ -63,4 +63,4 @@ def Stmt.size : Stmt → Nat
   | .call .. => 1
   | .ret .. => 1
 
-end LeanAsm.SAsm
+end LeanAsm.Rv64.SAsm

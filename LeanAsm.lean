@@ -6,8 +6,8 @@ import LeanAsm.Rv64.Profile
 import LeanAsm.Rv64.Execution
 import LeanAsm.Rv64.Encoding
 import LeanAsm.Rv64.Emit
-import LeanAsm.SAsm.Ast
-import LeanAsm.SAsm.Flatten
+import LeanAsm.Rv64.SAsm.Ast
+import LeanAsm.Rv64.SAsm.Flatten
 import LeanAsm.Symbolic
 import LeanAsm.Frontend
 import LeanAsm.ABI.LP64

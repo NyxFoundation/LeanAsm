@@ -1,6 +1,6 @@
 import LeanAsm.Rv64.Profile
 import LeanAsm.Rv64.Emit
-import LeanAsm.SAsm.Flatten
+import LeanAsm.Rv64.SAsm.Flatten
 import LeanAsm.Symbolic
 import LeanAsm.X64.Symbolic
 
@@ -54,7 +54,7 @@ instance : EmitAsm X64.Program where
 instance : EmitAsm X64.Symbolic.Program where
   emit _ program := (X64.Symbolic.emit program).mapError (fun error => s!"x64: {repr error}")
 
-namespace SAsm
+namespace Rv64.SAsm
 
 structure Source where
   base : Rv64.Word
@@ -71,5 +71,5 @@ instance : EmitAsm Source where
     let program ← lowerRv64 source
     return Rv64.emitProgram name program
 
-end SAsm
+end Rv64.SAsm
 end LeanAsm
