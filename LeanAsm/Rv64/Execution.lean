@@ -116,6 +116,31 @@ def execInstr (i : Instr) (s : State) : Except Trap State :=
   | .REMU rd a b => writeReg s rd (get a % get b)
   | .FENCE => .ok s.advance
 
+/-- The high half of the zero-extended product in Nat-division form, for
+    consumers that step MULHU against independent Nat arithmetic. -/
+theorem mulhu_nat (a b : Word) :
+    (((a.zeroExtend 128 * b.zeroExtend 128) >>> 64).truncate 64) =
+      BitVec.ofNat 64 ((a.toNat * b.toNat) / 2 ^ 64) := by
+  have ha : a.toNat < 2 ^ 64 := by omega
+  have hb : b.toNat < 2 ^ 64 := by omega
+  have h3 : a.toNat * b.toNat ≤ (2 ^ 64 - 1) * (2 ^ 64 - 1) := by
+    have h1 : a.toNat ≤ 2 ^ 64 - 1 := Nat.le_of_lt_succ ha
+    have h2 : b.toNat ≤ 2 ^ 64 - 1 := Nat.le_of_lt_succ hb
+    exact Nat.mul_le_mul h1 h2
+  have h4 : (2 ^ 64 - 1) * (2 ^ 64 - 1) + (2 ^ 65 - 1) = 2 ^ 128 := by decide
+  have h5 : (2 ^ 128 - 1) / 2 ^ 64 = 2 ^ 64 - 1 := by decide
+  have hdiv : a.toNat * b.toNat / 2 ^ 64 < 2 ^ 64 := by
+    have h6 : (a.toNat * b.toNat) / 2 ^ 64 ≤ (2 ^ 128 - 1) / 2 ^ 64 :=
+      Nat.div_le_div_right (Nat.le_trans h3 (by omega))
+    omega
+  have hprod : (a.zeroExtend 128 * b.zeroExtend 128).toNat = a.toNat * b.toNat := by
+    rw [BitVec.toNat_mul]
+    simp
+    omega
+  apply BitVec.eq_of_toNat_eq
+  rw [BitVec.toNat_setWidth 64, BitVec.toNat_ushiftRight, Nat.shiftRight_eq_div_pow, hprod,
+    BitVec.toNat_ofNat, Nat.mod_eq_of_lt hdiv]
+
 def step (p : Image) (s : State) : Except Trap State := do
   execInstr (← p.fetch s.pc) s
 
