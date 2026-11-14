@@ -34,36 +34,6 @@ def branch (s : State) (taken : Bool) (offset : BitVec 13) :
   if taken then jump s .x0 (s.pc + offset.signExtend 64)
   else .ok s.advance
 
-private def signed32 (value : Word) : Word :=
-  (value.truncate 32).signExtend 64
-
-private def rv64Div (a b : Word) : Word :=
-  if b == 0 then BitVec.allOnes 64 else BitVec.sdiv a b
-
-private def rv64Divu (a b : Word) : Word :=
-  if b == 0 then BitVec.allOnes 64 else a / b
-
-private def rv64Rem (a b : Word) : Word :=
-  if b == 0 then a else BitVec.srem a b
-
-private def rv64Remu (a b : Word) : Word :=
-  if b == 0 then a else a % b
-
-private def rv64Mulh (a b : Word) : Word :=
-  let a128 : BitVec 128 := a.signExtend 128
-  let b128 : BitVec 128 := b.signExtend 128
-  ((a128 * b128) >>> 64).truncate 64
-
-private def rv64Mulhsu (a b : Word) : Word :=
-  let a128 : BitVec 128 := a.signExtend 128
-  let b128 : BitVec 128 := b.zeroExtend 128
-  ((a128 * b128) >>> 64).truncate 64
-
-private def rv64Mulhu (a b : Word) : Word :=
-  let a128 : BitVec 128 := a.zeroExtend 128
-  let b128 : BitVec 128 := b.zeroExtend 128
-  ((a128 * b128) >>> 64).truncate 64
-
 def execInstr (i : Instr) (s : State) : Except Trap State :=
   let get := s.getReg
   match i with
@@ -77,8 +47,8 @@ def execInstr (i : Instr) (s : State) : Except Trap State :=
   | .XOR rd a b => writeReg s rd (get a ^^^ get b)
   | .SLT rd a b => writeReg s rd (if BitVec.slt (get a) (get b) then 1 else 0)
   | .SLTU rd a b => writeReg s rd (if BitVec.ult (get a) (get b) then 1 else 0)
-  | .ADDW rd a b => writeReg s rd (signed32 (get a + get b))
-  | .SUBW rd a b => writeReg s rd (signed32 (get a - get b))
+  | .ADDW rd a b => writeReg s rd (((get a + get b).truncate 32).signExtend 64)
+  | .SUBW rd a b => writeReg s rd (((get a - get b).truncate 32).signExtend 64)
   | .ADDI rd a imm => writeReg s rd (get a + imm.signExtend 64)
   | .ANDI rd a imm => writeReg s rd (get a &&& imm.signExtend 64)
   | .ORI rd a imm => writeReg s rd (get a ||| imm.signExtend 64)
@@ -109,9 +79,9 @@ def execInstr (i : Instr) (s : State) : Except Trap State :=
   | .LH rd a off => loadReg s 2 rd a off (fun x => (x.truncate 16).signExtend 64)
   | .LW rd a off => loadReg s 4 rd a off (fun x => (x.truncate 32).signExtend 64)
   | .LD rd a off => loadReg s 8 rd a off
-  | .LBU rd a off => loadReg s 1 rd a off (fun x => (x.truncate 8).zeroExtend 64)
-  | .LHU rd a off => loadReg s 2 rd a off (fun x => (x.truncate 16).zeroExtend 64)
-  | .LWU rd a off => loadReg s 4 rd a off (fun x => (x.truncate 32).zeroExtend 64)
+  | .LBU rd a off => loadReg s 1 rd a off
+  | .LHU rd a off => loadReg s 2 rd a off
+  | .LWU rd a off => loadReg s 4 rd a off
   | .SB a b off => storeReg s 1 a b off
   | .SH a b off => storeReg s 2 a b off
   | .SW a b off => storeReg s 4 a b off
@@ -125,13 +95,25 @@ def execInstr (i : Instr) (s : State) : Except Trap State :=
   | .JAL rd off => jump s rd (s.pc + off.signExtend 64)
   | .JALR rd a off => jump s rd ((get a + off.signExtend 64) &&& (~~~(1 : Word)))
   | .MUL rd a b => writeReg s rd (get a * get b)
-  | .MULH rd a b => writeReg s rd (rv64Mulh (get a) (get b))
-  | .MULHSU rd a b => writeReg s rd (rv64Mulhsu (get a) (get b))
-  | .MULHU rd a b => writeReg s rd (rv64Mulhu (get a) (get b))
-  | .DIV rd a b => writeReg s rd (rv64Div (get a) (get b))
-  | .DIVU rd a b => writeReg s rd (rv64Divu (get a) (get b))
-  | .REM rd a b => writeReg s rd (rv64Rem (get a) (get b))
-  | .REMU rd a b => writeReg s rd (rv64Remu (get a) (get b))
+  | .MULH rd a b =>
+      writeReg s rd
+        (((((get a).signExtend 128 * (get b).signExtend 128) >>> 64).truncate 64))
+  | .MULHSU rd a b =>
+      writeReg s rd
+        (((((get a).signExtend 128 * (get b).zeroExtend 128) >>> 64).truncate 64))
+  | .MULHU rd a b =>
+      writeReg s rd
+        (((((get a).zeroExtend 128 * (get b).zeroExtend 128) >>> 64).truncate 64))
+  | .DIV rd a b =>
+      writeReg s rd
+        (if get b == 0 then BitVec.allOnes 64 else BitVec.sdiv (get a) (get b))
+  | .DIVU rd a b =>
+      writeReg s rd
+        (if get b == 0 then BitVec.allOnes 64 else get a / get b)
+  | .REM rd a b =>
+      writeReg s rd
+        (if get b == 0 then get a else BitVec.srem (get a) (get b))
+  | .REMU rd a b => writeReg s rd (get a % get b)
   | .FENCE => .ok s.advance
 
 def step (p : Image) (s : State) : Except Trap State := do
