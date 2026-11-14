@@ -1,6 +1,6 @@
 ---
 title: LeanAsm design
-last_updated: 2026-11-14
+last_updated: 2026-11-15
 tags:
   - architecture
   - assembly
@@ -20,7 +20,7 @@ modifying evm-asm and without depending on riscv-zkvm.
 ```text
 project specifications and routines
               |
-        LeanAsm.SAsm
+      LeanAsm.Rv64.SAsm
               |
    LeanAsm.Rv64.Execution
        /              \
@@ -30,8 +30,8 @@ Encoding / Emit    Region Memory
 The diagram describes the existing RV64 path. `LeanAsm.X64` supplies a
 separate scalar x86-64 instruction, encoding, and execution path, with
 `X64.Symbolic` for labels and data and `ABI.SysVAMD64` for C calls.
-The shared frontend capabilities select the target explicitly; SAsm is not
-silently translated between architectures.
+The shared frontend capabilities select the target explicitly.
+`LeanAsm.Rv64.SAsm` is an RV64 layer, not a target-neutral representation.
 
 ### Fixed-width ISA
 
@@ -71,12 +71,20 @@ X64 has a separate unaligned-access model. Its scalar width type restricts
 access widths; containment and write-permission checks remain mandatory.
 Code is immutable and checked separately from writable data regions in both.
 
-### SAsm
+### RV64 structured assembly
 
-The initial common denominator contains block, sequence, conditional, loop,
-direct call, and return. Verification annotations are deliberately not stored
-in the core AST. A later proof layer can attach invariants and contracts without
-making syntax and lowering depend on one project's assertion language.
+`LeanAsm.Rv64.SAsm` contains blocks, sequences, conditionals, loops, direct
+calls, and returns. Conditions and blocks use RV64 registers and instructions;
+lowering uses fixed four-byte instruction sizes. Verification annotations are
+not stored in the core AST. A later proof layer can attach invariants and
+contracts without making syntax and lowering depend on one project's assertion
+language.
+
+After `lake build`, run the structured lowering regression checks with:
+
+```sh
+lake env lean Tests/Rv64/SAsm.lean
+```
 
 ## Trust boundary
 
@@ -87,7 +95,7 @@ not yet prove:
 - equivalence with physical RISC-V or x86-64 hardware,
 - equivalence with GNU binutils or QEMU,
 - correctness of symbolic pseudo-instruction expansion,
-- whole-program SAsm lowering soundness,
+- whole-program RV64 SAsm lowering soundness,
 - operating-system or MMU behavior.
 
 These are explicit future proof obligations rather than inherited claims.

@@ -1,8 +1,8 @@
-import LeanAsm.SAsm.Ast
+import LeanAsm.Rv64.SAsm.Ast
 
 /-! Position-aware lowering of structured assembly to fixed-width instructions. -/
 
-namespace LeanAsm.SAsm
+namespace LeanAsm.Rv64.SAsm
 
 open LeanAsm.Rv64
 namespace Stmt
@@ -86,4 +86,4 @@ def lower (addr : Word) (stmt : Stmt) : Except LowerError (Array Instr) :=
   else .error .notLowerable
 
 end Stmt
-end LeanAsm.SAsm
+end LeanAsm.Rv64.SAsm
