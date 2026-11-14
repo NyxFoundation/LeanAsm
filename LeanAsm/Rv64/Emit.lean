@@ -12,6 +12,9 @@ private def rrr (op : String) (d a b : Reg) : String :=
 private def rri (op : String) (d a : Reg) (n : Int) : String :=
   s!"{op} {reg d}, {reg a}, {n}"
 
+private def rriU (op : String) (d a : Reg) (n : Nat) : String :=
+  s!"{op} {reg d}, {reg a}, {n}"
+
 private def load (op : String) (d a : Reg) (n : Int) : String :=
   s!"{op} {reg d}, {n}({reg a})"
 
@@ -40,12 +43,12 @@ def emitInstr : Instr → String
   | .XORI d a n => rri "xori" d a n.toInt
   | .SLTI d a n => rri "slti" d a n.toInt
   | .SLTIU d a n => rri "sltiu" d a n.toInt
-  | .SLLI d a n => rri "slli" d a n.toInt
-  | .SRLI d a n => rri "srli" d a n.toInt
-  | .SRAI d a n => rri "srai" d a n.toInt
+  | .SLLI d a n => rriU "slli" d a n.toNat
+  | .SRLI d a n => rriU "srli" d a n.toNat
+  | .SRAI d a n => rriU "srai" d a n.toNat
   | .ADDIW d a n => rri "addiw" d a n.toInt
-  | .SLLIW d a n => rri "slliw" d a n.toInt
-  | .SRLIW d a n => rri "srliw" d a n.toInt
+  | .SLLIW d a n => rriU "slliw" d a n.toNat
+  | .SRLIW d a n => rriU "srliw" d a n.toNat
   | .LUI d n => s!"lui {reg d}, {n.toNat}"
   | .AUIPC d n => s!"auipc {reg d}, {n.toNat}"
   | .LB d a n => load "lb" d a n.toInt
