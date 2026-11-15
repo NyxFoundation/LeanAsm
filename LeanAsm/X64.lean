@@ -4,6 +4,7 @@ import LeanAsm.X64.Memory
 import LeanAsm.X64.Flags
 import LeanAsm.X64.State
 import LeanAsm.X64.Execution
+import LeanAsm.X64.Properties
 import LeanAsm.X64.Emit
 import LeanAsm.X64.Symbolic
 import LeanAsm.ABI.SysVAMD64

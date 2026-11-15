@@ -96,6 +96,8 @@ def main() -> None:
             raise RuntimeError(f"required test tool is unavailable: {tool}")
     print(run("lake", "build").strip())
     run("lake", "env", "lean", "Tests/X64.lean")
+    run("lake", "env", "lean", "Tests/X64/Proofs.lean")
+    print("PASS: X64 semantic checks, theorem consumers, and axiom checks")
     with tempfile.TemporaryDirectory(prefix="leanasm-x64-") as temporary:
         directory = Path(temporary)
         print(run("lake", "env", "lean", "--run", "Tests/X64/Generate.lean", str(directory)).strip())
